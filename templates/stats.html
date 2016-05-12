@@ -16,8 +16,8 @@
 <tr>
  <thead>
 <th>Name</th>
-<th>Time(min)</th>
-<th>Last Used</th>
+<th>Duration(min)</th>
+<th>Time Stamp</th>
  <thead>
 </tr>
  <tbody id ="modal_table">
@@ -28,6 +28,8 @@
 </div>
 <div class="row">
 <div class ="col s8 offset-s2">
+<p>I am a <span class ="user_type"></span></p>
+<p>My monthly useage is <span class ="avg_useage"></span> Hours per day</p>
 <div class="card-panel #f1f8e9 light-green lighten-5">
 <table class=" bordered centered responsive-table tablesorter">
         <thead>
@@ -65,11 +67,39 @@
           </div>
           </div>
 </body>
-      <!--Import jQuery before materialize.js-->
       <script type="text/javascript" src=  {{url_for('static', filename='js/jquery-2.1.1.min.js')}} ></script>
       <script type="text/javascript" src=  {{url_for('static', filename='js/materialize.min.js')}} ></script>
       <script type="text/javascript" src=  {{url_for('static', filename='js/jquery.tablesorter.js')}} ></script>
       <script>
+function monthly_useage(){
+var time_sum = 0;
+// iterate through each td based on class and add the values
+$(".total-val").each(function() {
+    var value = $(this).text();
+    var day = 0
+    // add only if the value is number
+    if(!isNaN(value) && value.length != 0) {
+        time_sum += parseFloat(value);
+        day =day+1;
+        if(day>30)
+        	return true;
+    }
+});
+var user_type = "";
+var avarage_mobile_useage = time_sum/(30*60);
+if (avarage_mobile_useage>8.0){
+	user_type = "High Mobile Addict";
+}
+else if(avarage_mobile_useage<8.0 && avarage_mobile_useage> 4.0){
+	user_type = "Moderate Mobile Addict";
+}
+else{
+	user_type = "Casual Mobile User";
+}
+$(".user_type").text(user_type);
+$(".avg_useage").text(avarage_mobile_useage);
+}
+
       $('th').click(function (){
     var table = $(this).parents('table').eq(0)
     var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
@@ -92,33 +122,24 @@ function comparer(index) {
 }
 function getCellValue(row, index){ return $(row).children('td').eq(index).html() }
 $( document ).ready(function() {
-  // Handler for .ready() called.
     var table = $("#date").parents('table').eq(0)
     var rows = table.find('tr:gt(0)').toArray().sort(comparer($("#date").index()))
     this.asc = !this.asc
-    if (!this.asc){rows = rows.reverse()}
+    if (this.asc){rows = rows.reverse()}
     for (var i = 0; i < rows.length; i++){table.append(rows[i])}
 	total();
+monthly_useage();
 });
-// $(document).click(function(event) {
-//     if(!$(event.target).closest('.modal').length &&
-//        !$(event.target).is('.modal')) {
-//         if($('.modal').is(":visible")) {
-//             $('.modal').hide();
-//         }
-//     }
-// })
+
+
 $('.shadow').click(function(){
 	$(this).hide();
 	$(".modal").hide();
 });
 $('td').click(function(){
-	console.log("just got clicked");
 if ($(this).html()!=0 && $(this).attr("class") !="total-val" && $(this).index()!=0){
-	console.log($(this).index());
 	var index = $(this).index();
 	var date = $.trim($(this).parents('tr').first().text().split('\n')[1]);
-	console.log($.trim($(this).parents('tr').first().text().split('\n')[1]));
 	$.ajax({
   method: "POST",
   url: "/moredetails",
@@ -126,44 +147,33 @@ if ($(this).html()!=0 && $(this).attr("class") !="total-val" && $(this).index()!
   data: JSON.stringify({ date: date, index: index })
 })
   .done(function( msg ) {
-  	// m = JSON.load(msg);
   	var parsed_data = JSON.parse(msg);
-  	console.log(parsed_data['used_app']);
   	for (var i =0; i<parsed_data['used_app'].length; i++){
   		if (parsed_data.used_app[i].Foreground !=0){
-  		console.log(parsed_data.used_app[i].Foreground);
   		var row ="";
   		   for (var i = 0; i < parsed_data['used_app'].length; i++) {
                     if (parsed_data.used_app[i].Foreground != 0) {
-                        console.log(parsed_data.used_app[i].Foreground);
-                        row += "<tr><td>" + parsed_data.used_app[i].Name + "</td><td>"+
+                        row += "<tr><td>" + parsed_data.used_app[i].Name + "</td><td id =\"modal_time\">"+
                         parsed_data.used_app[i].Foreground +"</td><td>"+
                         parsed_data.used_app[i].Last_time.split(" ")[1]+" "+parsed_data.used_app[i].Last_time.split(" ")[2] +"</td></tr>";
-                        
                     }
                 }$("#modal_table").html(row);
   	}
   	}
+
     $(".shadow").show();
 	$(".modal").show();
-
-    // $("#modal_table").html()
-
   });}
 });
 function total(){
     $('tr').each(function () {
-        //the value of sum needs to be reset for each row, so it has to be set inside the row loop
         var sum = 0
-        //find the combat elements in the current row and sum it
         $(this).find('td').each(function () {
             var combat = $(this).text();
-
             if (!isNaN(combat) && combat.length !== 0) {
                 sum += parseFloat(combat);
             }
         });
-        //set the value of currents rows sum to the total-combat element in the current row
         $('.total-val', this).html(sum);
     });
 }
