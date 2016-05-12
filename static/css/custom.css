@@ -1,0 +1,27 @@
+td:hover {
+    background: rgba(169, 169, 169, 0.42);
+    cursor:default;
+}body{
+    background-color: gainsboro;}
+th{cursor:pointer;}
+th:hover{
+	text-decoration: underline;
+}
+.modal{
+		position: fixed;
+		width: 50%;
+		height: 50%;
+		/*display: block;*/
+		z-index: 999;
+		background: white;
+		top:25%;
+		display: none;
+		}
+.shadow{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background: black;
+	opacity: .4;
+	display: none;
+}

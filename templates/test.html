@@ -1,0 +1,33 @@
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script>
+      $(function(){
+        // Post json to server
+        $('.post').click(function(){
+        	var fd = new FormData();
+            fd.append( "fileInput", $("#fileInput")[0].files[0]);
+            alert(fd.valueOf('fileInput'));
+          $.ajax({
+            type: 'POST',
+            // Provide correct Content-Type, so that Flask will know how to process it.
+            contentType: 'application/json',
+            // Encode data as JSON.
+      		data: new FormData( this ),
+		  	processData: false,
+		  	contentType: false,
+ 		  	cache: false,
+            // This is the type of data expected back from the server.
+            dataType: 'json',
+            url: '/done',
+            success: function (ret) {
+              alert('JSON posted: ' + JSON.stringify(ret));
+            }
+          });
+        });
+      });
+    </script>
+    <!-- action = "/done" -->
+<form name="upload">
+<p>New Text for testing</p>
+  <input type="file" id = "fileInput" name="json_file" />
+  <button type="submit" class = 'post'name="submit">Upload</button>
+</form>
